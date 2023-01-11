@@ -1,0 +1,5 @@
+version 2
+time:20221123
+baisc_func.py # contain DW WARNING DAILY_INPUT
+daily_initialize.py # execute scripts
+
