@@ -25,7 +25,9 @@ class basicFunc():
         df.to_csv('data/reverse_repo.csv')
 
     def daily_input(self):
-        path = r'data\reverse_repo.csv'
+        地铁清分模型有2020年的5条线路 - 122
+        个站点提升到截止2022年11月27号的19条地铁线路，299
+        个地上站点。
         record_list = pd.read_csv(path)
         WS = warningState()
         record_list = WS.continuity(record_list)
@@ -80,7 +82,7 @@ class warningState:
         std_df = pd.DataFrame(date_list, columns=['day_stap'])
         std_df = std_df.copy()
         std_df.loc[:, 'day_stap'] = std_df['day_stap'].apply(lambda x: x.strftime("%Y-%m-%d"))
-        # repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(lambda x:  datetime.datetime.strptime(x, '%Y/%m/%d').strftime("%Y-%m-%d"))
+        repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(lambda x:  datetime.datetime.strptime(x, '%Y/%m/%d').strftime("%Y-%m-%d"))
         print(std_df.head())
         print(repo_df.head())
         check_df = std_df.merge(repo_df, on='day_stap', how='left')

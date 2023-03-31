@@ -4,6 +4,10 @@ import os
 from basic_func import basicFunc,warningState,dataWarehouse
 
 def daily_initialize():
+    '''
+
+    :return:
+    '''
 
     BF = basicFunc()
     # input daily reverse repo
