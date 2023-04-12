@@ -25,9 +25,7 @@ class basicFunc():
         df.to_csv('data/reverse_repo.csv')
 
     def daily_input(self):
-        地铁清分模型有2020年的5条线路 - 122
-        个站点提升到截止2022年11月27号的19条地铁线路，299
-        个地上站点。
+        path = r'data\reverse_repo.csv'
         record_list = pd.read_csv(path)
         WS = warningState()
         record_list = WS.continuity(record_list)
@@ -41,6 +39,7 @@ class basicFunc():
         daily_record = pd.DataFrame([day, repo, time_stap]).T
         daily_record.to_csv(path, mode='a', header=False)
         record_list = pd.read_csv(path)
+        print(record_list.head())
         record = self.daily_data_check(record_list)
         record.to_csv(path)
 
@@ -76,7 +75,7 @@ class warningState:
 
     def continuity(self, repo_df):
 
-        sdate = date(2022, 7, 1)  # start date
+        sdate = date(2023, 1, 28)  # start date
         edate = datetime.datetime.now()
         date_list = pd.date_range(sdate, edate - timedelta(days=1), freq='d')
         std_df = pd.DataFrame(date_list, columns=['day_stap'])
@@ -89,6 +88,7 @@ class warningState:
         check_df.loc[:, 'day_stap_date'] = pd.to_datetime(check_df['day_stap'], format='%Y-%m-%d')
         check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: 'workday' if x.weekday() < 5 else 'weekend')
         error_cnt = check_df[check_df['repo'].isnull()].shape[0]
+        print(error_cnt)
         if error_cnt > 0:
             print('存在丢失数据')
             # print(check_df)
@@ -122,10 +122,6 @@ class dataWarehouse:
         valid_section_list = []
         for i in range(repo_cnt):
             aim_section = repo_list[:i + 1]
-            valid_section = []
-            # for ele in aim_section:
-            #     if ele != 0:
-            #         valid_section.append(ele)
             valid_section = aim_section
             valid_section_list.append(valid_section[-7:])
             reverse_repo_for_week.append(np.sum(valid_section[-7:]))
