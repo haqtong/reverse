@@ -21,7 +21,15 @@ def daily_broadcast():
     # normal broadcast
     BF.broadcast()
 
+def annual_initialize():
+    BF = basicFunc()
+    # input daily reverse repo
+    BF.annual_input()
+
+
+
 if __name__ == '__main__':
     daily_initialize()
     daily_broadcast()
+    # annual_initialize()
 

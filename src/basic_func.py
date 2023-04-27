@@ -43,6 +43,20 @@ class basicFunc():
         record = self.daily_data_check(record_list)
         record.to_csv(path)
 
+    def annual_input(self):
+        path = r'data\reverse_annual_repo.csv'
+        now = datetime.datetime.now()
+        day = now.strftime("%Y-%m-%d")
+        time_stap = now.strftime("%Y-%m-%d %H:%M:%S")
+        print('请输入当天的年度逆回购水平：')
+        repo = input()
+        daily_record = pd.DataFrame([day, repo, time_stap]).T
+        daily_record.to_csv(path, mode='a', header=False)
+        record_list = pd.read_csv(path)
+        print(record_list.head())
+        record = self.daily_data_check(record_list)
+        record.to_csv(path,index = 0)
+
     def daily_data_check(self, record):  # - >record - df
         record.columns = ['index', 'day_stap', 'repo', 'time_stap']
         record = record.copy()
@@ -61,13 +75,12 @@ class basicFunc():
         repo_daily = daily_net_outflow_df['repo'].values[0]
         outflow_daily = daily_net_outflow_df['outflow'].values[0]
         repo_for_week = reverse_repo_for_week_df['repo_for_week'].values[0]
-        print('央行7天逆回购{}亿,7天期限累计{}亿；'.format(repo_daily, repo_for_week))
         if outflow_daily>0:
-            print('单日逆回购流入{}亿'.format(math.fabs(outflow_daily)))
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流入{}亿'.format(repo_daily, repo_for_week,math.fabs(outflow_daily)))
         elif outflow_daily<0:
-            print('单日逆回购流出{}亿'.format(math.fabs(outflow_daily)))
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流出{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         else:
-            print('单日逆回购持平')
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购持平'.format(repo_daily, repo_for_week))
 
 class warningState:
     def __init__(self):
@@ -82,13 +95,10 @@ class warningState:
         std_df = std_df.copy()
         std_df.loc[:, 'day_stap'] = std_df['day_stap'].apply(lambda x: x.strftime("%Y-%m-%d"))
         repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(lambda x:  datetime.datetime.strptime(x, '%Y-%m-%d').strftime("%Y-%m-%d"))
-        print(std_df.head())
-        print(repo_df.head())
         check_df = std_df.merge(repo_df, on='day_stap', how='left')
         check_df.loc[:, 'day_stap_date'] = pd.to_datetime(check_df['day_stap'], format='%Y-%m-%d')
         check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: 'workday' if x.weekday() < 5 else 'weekend')
         error_cnt = check_df[check_df['repo'].isnull()].shape[0]
-        print(error_cnt)
         if error_cnt > 0:
             print('存在丢失数据')
             # print(check_df)
