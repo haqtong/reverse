@@ -39,7 +39,7 @@ class basicFunc():
         daily_record = pd.DataFrame([day, repo, time_stap]).T
         daily_record.to_csv(path, mode='a', header=False)
         record_list = pd.read_csv(path)
-        print(record_list.head())
+        # print(record_list.head())
         record = self.daily_data_check(record_list)
         record.to_csv(path)
 
@@ -110,7 +110,7 @@ class warningState:
             error_cnt = check_df[check_df['repo'].isnull()].shape[0]
             if error_cnt > 0:
                 print('存在丢失数据需要手动补充，时间为：')
-                missing_date = check_df[check_df['repo'].isnull()]['date_stap'].values.tolist()
+                # missing_date = check_df[check_df['repo'].isnull()]['date_stap'].values.tolist()
                 # print(missing_date)
         else:
             print('完成数据检查，数据合格')
