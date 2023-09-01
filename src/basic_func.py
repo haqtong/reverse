@@ -51,7 +51,7 @@ class basicFunc():
         print('请输入当天的年度逆回购水平：')
         repo = input()
         daily_record = pd.DataFrame([day, repo, time_stap]).T
-        daily_record.to_csv(path, mode='a', header=False)
+        daily_record.to_csv(path, mode='a', header=False,index =0)
         record_list = pd.read_csv(path)
         print(record_list.head())
         record = self.daily_data_check(record_list)

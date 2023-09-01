@@ -31,12 +31,13 @@ def plotshow():
     # df = pd.read_csv(infn)
     # df.loc[:,'月份'] = df['day_stap'].apply(lambda x:)
     # print(df.head())
+    # plotshow()
     pass # 好像tableau更方便
 
 
 if __name__ == '__main__':
-    # daily_initialize()
-    # daily_broadcast()
+    daily_initialize()
+    daily_broadcast()
     # annual_initialize()
-    plotshow()
+
 
