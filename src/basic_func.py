@@ -47,18 +47,33 @@ class basicFunc():
         path = r'data\reverse_annual_repo.csv'
         now = datetime.datetime.now()
         day = now.strftime("%Y-%m-%d")
-        time_stap = now.strftime("%Y-%m-%d %H:%M:%S")
+        time_stap = now.strftime("%Y/%m/%d %H:%M:%S")
         print('请输入当天的年度逆回购水平：')
         repo = input()
         daily_record = pd.DataFrame([day, repo, time_stap]).T
-        daily_record.to_csv(path, mode='a', header=False,index =0)
+        daily_record.to_csv(path, mode='a', header=False, index=0)
         record_list = pd.read_csv(path)
         print(record_list.head())
         record = self.daily_data_check(record_list)
-        record.to_csv(path,index = 0)
+        record.to_csv(path, index=0)
+
+    def double_weekly_input(self):
+        path = r'data\reverse_double_weekly_repo.csv'
+        now = datetime.datetime.now()
+        day = now.strftime("%Y-%m-%d")
+        time_stap = now.strftime("%Y/%m/%d %H:%M:%S")
+        print('请输入当天的14天逆回购水平：')
+        repo = input()
+        daily_record = pd.DataFrame([day, repo, time_stap]).T
+        daily_record.to_csv(path, mode='a', header=False, index=0)
+        record_list = pd.read_csv(path)
+        print(record_list.head())
+        record = self.daily_data_check(record_list)
+        record.to_csv(path, index=0)
 
     def daily_data_check(self, record):  # - >record - df
-        record.columns = ['index', 'day_stap', 'repo', 'time_stap']
+        print(record)
+        record.columns = ['day_stap', 'repo', 'time_stap']
         record = record.copy()
         record.loc[:, 'rank'] = record.groupby('day_stap')['time_stap'].rank('first', ascending=False)
         record = record[record['rank'] == 1].copy()
@@ -67,6 +82,8 @@ class basicFunc():
         return record
 
     def broadcast(self):
+        double_weekly_df = pd.read_csv(r'data\reverse_double_weekly_repo.csv')
+        annual_df = pd.read_csv(r'data\reverse_annual_repo.csv')
         daily_net_outflow_df = pd.read_csv(r'output\daily_net_outflow.csv')
         reverse_repo_for_week_df = pd.read_csv(r'output\reverse_repo_for_week.csv')
         today = str(datetime.datetime.now().strftime("%Y-%m-%d"))
@@ -75,12 +92,25 @@ class basicFunc():
         repo_daily = daily_net_outflow_df['repo'].values[0]
         outflow_daily = daily_net_outflow_df['outflow'].values[0]
         repo_for_week = reverse_repo_for_week_df['repo_for_week'].values[0]
-        if outflow_daily>0:
-            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流入{}亿'.format(repo_daily, repo_for_week,math.fabs(outflow_daily)))
-        elif outflow_daily<0:
+        try:
+            week_val = int(double_weekly_df[double_weekly_df['day_stap'] == today]['repo'].values[0])
+        except:
+            week_val = 0
+        try:
+            annual_val = int(annual_df[annual_df['day_stap'] == today]['repo'].values[0])
+        except:
+            annual_val = 0
+        if outflow_daily > 0:
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流入{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
+        elif outflow_daily < 0:
             print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流出{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         else:
             print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购持平'.format(repo_daily, repo_for_week))
+        if week_val > 0:
+            print('央行14天逆回购{}亿'.format(week_val))
+        if annual_val > 0:
+            print('央行年度逆回购{}亿'.format(annual_val))
+
 
 class warningState:
     def __init__(self):
@@ -94,7 +124,8 @@ class warningState:
         std_df = pd.DataFrame(date_list, columns=['day_stap'])
         std_df = std_df.copy()
         std_df.loc[:, 'day_stap'] = std_df['day_stap'].apply(lambda x: x.strftime("%Y-%m-%d"))
-        repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(lambda x:  datetime.datetime.strptime(x, '%Y-%m-%d').strftime("%Y-%m-%d"))
+        repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(
+            lambda x: datetime.datetime.strptime(x, '%Y-%m-%d').strftime("%Y-%m-%d"))
         check_df = std_df.merge(repo_df, on='day_stap', how='left')
         check_df.loc[:, 'day_stap_date'] = pd.to_datetime(check_df['day_stap'], format='%Y-%m-%d')
         check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: 'workday' if x.weekday() < 5 else 'weekend')
@@ -110,8 +141,9 @@ class warningState:
             error_cnt = check_df[check_df['repo'].isnull()].shape[0]
             if error_cnt > 0:
                 print('存在丢失数据需要手动补充，时间为：')
-                # missing_date = check_df[check_df['repo'].isnull()]['date_stap'].values.tolist()
-                # print(missing_date)
+                print(check_df.columns)
+                missing_date = check_df[check_df['repo'].isnull()]['day_stap'].values.tolist()
+                print(missing_date)
         else:
             print('完成数据检查，数据合格')
         check_df = pd.DataFrame(check_df, columns=['day_stap', 'repo', 'time_stap'])
@@ -149,7 +181,6 @@ class dataWarehouse:
         prior_repo = []
         for i in range(repo_cnt):
             aim_section = repo_list[:i + 1]
-            valid_section = []
             # for ele in aim_section:
             #     if ele != 0:
             #         valid_section.append(ele)
@@ -163,6 +194,32 @@ class dataWarehouse:
         daily_net_outflow_df.loc[:, 'outflow'] = daily_net_outflow_df.apply(lambda x: x['repo'] - x['prior_repo'],
                                                                             axis=1)
         daily_net_outflow_df.to_csv('output/daily_net_outflow.csv', index=0)
+
+    def double_weekly_repo_level(self):
+        path = r'data\reverse_repo.csv'
+        df = pd.read_csv(path, encoding='gbk')
+        day_stap_list = df['day_stap'].values.tolist()
+        repo_list = df['repo'].values.tolist()
+        repo_cnt = len(repo_list)
+        prior_repo = []
+        for i in range(repo_cnt):
+            aim_section = repo_list[:i + 1]
+            # for ele in aim_section:
+            #     if ele != 0:
+            #         valid_section.append(ele)
+            valid_section = aim_section
+            if len(valid_section) >= 15:
+                prior_repo.append(valid_section[-15])
+            else:
+                prior_repo.append(0)
+        daily_net_outflow_df = pd.DataFrame([day_stap_list, repo_list, prior_repo]).T
+        daily_net_outflow_df.columns = ['day_stap', 'repo', 'prior_repo']
+        daily_net_outflow_df.loc[:, 'outflow'] = daily_net_outflow_df.apply(lambda x: x['repo'] - x['prior_repo'],
+                                                                            axis=1)
+        daily_net_outflow_df.to_csv('output/daily_net_outflow.csv', index=0)
+
+    def annual_weekly_repo_level(self):
+        pass
 
 
 if __name__ == '__main__':

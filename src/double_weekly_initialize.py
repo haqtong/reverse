@@ -16,19 +16,6 @@ def daily_initialize():
     DW.reverse_repo_for_week()
     DW.daily_repo_level()
 
-def daily_broadcast():
-    BF = basicFunc()
-    # normal broadcast
-    BF.broadcast()
-
-def annual_initialize():
-    BF = basicFunc()
-    # input annual reverse repo
-    BF.annual_input()
-    # DW = dataWarehouse()
-    # DW.reverse_repo_for_week()
-    # DW.daily_repo_level()
-
 def double_weekly_initialize():
     BF = basicFunc()
     # input annual reverse repo
@@ -49,9 +36,7 @@ def plotshow():
 
 
 if __name__ == '__main__':
-    daily_initialize()
-    # annual_initialize()
-    # double_weekly_initialize()
-    daily_broadcast()
+    double_weekly_initialize()
+    # daily_broadcast()
 
 
