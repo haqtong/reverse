@@ -45,9 +45,6 @@ def plotshow():
     # plotshow()
     pass # 好像tableau更方便
 
-
-
-
 if __name__ == '__main__':
     daily_initialize()
     # annual_initialize()

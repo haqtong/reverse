@@ -1,6 +1,1 @@
- version 2
-time:20221123
-baisc_func.py # contain DW WARNING DAILY_INPUT
-daily_initialize.py # execute scripts
-
-#只能补充周末数据，不能有效的识别法定节假日
+main

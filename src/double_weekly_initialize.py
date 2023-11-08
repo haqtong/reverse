@@ -37,6 +37,6 @@ def plotshow():
 
 if __name__ == '__main__':
     double_weekly_initialize()
-    # daily_broadcast()
+    daily_broadcast()
 
 

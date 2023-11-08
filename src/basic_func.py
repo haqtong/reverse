@@ -29,7 +29,7 @@ class basicFunc():
         record_list = pd.read_csv(path)
         WS = warningState()
         record_list = WS.continuity(record_list)
-        record_list.to_csv(path)
+        record_list.to_csv(path,index = 0)
 
         now = datetime.datetime.now()
         day = now.strftime("%Y-%m-%d")
@@ -37,9 +37,10 @@ class basicFunc():
         print('请输入当天的逆回购水平：')
         repo = input()
         daily_record = pd.DataFrame([day, repo, time_stap]).T
-        daily_record.to_csv(path, mode='a', header=False)
+        daily_record.to_csv(path, mode='a', header=False,index = 0)
         record_list = pd.read_csv(path)
-        # print(record_list.head())
+        print(record_list.head())
+
         record = self.daily_data_check(record_list)
         record.to_csv(path)
 
@@ -53,7 +54,6 @@ class basicFunc():
         daily_record = pd.DataFrame([day, repo, time_stap]).T
         daily_record.to_csv(path, mode='a', header=False, index=0)
         record_list = pd.read_csv(path)
-        print(record_list.head())
         record = self.daily_data_check(record_list)
         record.to_csv(path, index=0)
 
@@ -72,7 +72,6 @@ class basicFunc():
         record.to_csv(path, index=0)
 
     def daily_data_check(self, record):  # - >record - df
-        print(record)
         record.columns = ['day_stap', 'repo', 'time_stap']
         record = record.copy()
         record.loc[:, 'rank'] = record.groupby('day_stap')['time_stap'].rank('first', ascending=False)
@@ -124,8 +123,12 @@ class warningState:
         std_df = pd.DataFrame(date_list, columns=['day_stap'])
         std_df = std_df.copy()
         std_df.loc[:, 'day_stap'] = std_df['day_stap'].apply(lambda x: x.strftime("%Y-%m-%d"))
-        repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(
-            lambda x: datetime.datetime.strptime(x, '%Y-%m-%d').strftime("%Y-%m-%d"))
+        try:
+            repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(
+                lambda x: datetime.datetime.strptime(x, '%Y-%m-%d').strftime("%Y-%m-%d"))
+        except:
+            repo_df.loc[:, 'day_stap'] = repo_df['day_stap'].apply(
+                lambda x: datetime.datetime.strptime(x, '%Y/%m/%d').strftime("%Y-%m-%d"))
         check_df = std_df.merge(repo_df, on='day_stap', how='left')
         check_df.loc[:, 'day_stap_date'] = pd.to_datetime(check_df['day_stap'], format='%Y-%m-%d')
         check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: 'workday' if x.weekday() < 5 else 'weekend')
