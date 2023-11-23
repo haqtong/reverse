@@ -1,7 +1,7 @@
 #encoding=utf-8
 import pandas as pd
 import os
-from basic_func import basicFunc,warningState,dataWarehouse
+from data.reverse.src.basic_func import basicFunc,warningState,dataWarehouse
 
 def daily_initialize():
     '''
@@ -44,11 +44,14 @@ def plotshow():
     # print(df.head())
     # plotshow()
     pass # 好像tableau更方便
-
-if __name__ == '__main__':
+def exec():
     daily_initialize()
     # annual_initialize()
     # double_weekly_initialize()
     daily_broadcast()
+    # pass
+
+if __name__ == '__main__':
+    exec()
 
 
