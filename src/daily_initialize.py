@@ -47,7 +47,7 @@ def plotshow():
 def exec():
     daily_initialize()
     # annual_initialize()
-    # double_weekly_initialize()
+    double_weekly_initialize()
     daily_broadcast()
     # pass
 

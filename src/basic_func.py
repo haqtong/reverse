@@ -100,9 +100,9 @@ class basicFunc():
         except:
             annual_val = 0
         if outflow_daily > 0:
-            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流入{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购净流入{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         elif outflow_daily < 0:
-            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购流出{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
+            print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购净流出{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         else:
             print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购持平'.format(repo_daily, repo_for_week))
         if week_val > 0:
