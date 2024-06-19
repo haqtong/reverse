@@ -1,15 +1,15 @@
 #encoding=utf-8
 import pandas as pd
 import os
-from data.reverse.src.basic_func import basicFunc,warningState,dataWarehouse
+from src.basic_func import basicFunc,warningState,dataWarehouse
 
+BF = basicFunc()
 def daily_initialize():
     '''
 
     :return:
     '''
 
-    BF = basicFunc()
     # input daily reverse repo
     BF.daily_input()
     DW = dataWarehouse()
@@ -17,12 +17,10 @@ def daily_initialize():
     DW.daily_repo_level()
 
 def daily_broadcast():
-    BF = basicFunc()
     # normal broadcast
     BF.broadcast()
 
 def annual_initialize():
-    BF = basicFunc()
     # input annual reverse repo
     BF.annual_input()
     # DW = dataWarehouse()
@@ -30,7 +28,6 @@ def annual_initialize():
     # DW.daily_repo_level()
 
 def double_weekly_initialize():
-    BF = basicFunc()
     # input annual reverse repo
     BF.double_weekly_input()
     # DW = dataWarehouse()
@@ -47,7 +44,7 @@ def plotshow():
 def exec():
     daily_initialize()
     # annual_initialize()
-    double_weekly_initialize()
+    # double_weekly_initialize()
     daily_broadcast()
     # pass
 

@@ -4,6 +4,8 @@ import datetime
 from datetime import date, timedelta
 import numpy as np
 import math
+import os
+from config.set_config import Config_base
 
 
 class basicFunc():
@@ -29,7 +31,7 @@ class basicFunc():
         record_list = pd.read_csv(path)
         WS = warningState()
         record_list = WS.continuity(record_list)
-        record_list.to_csv(path,index = 0)
+        record_list.to_csv(path, index=0)
 
         now = datetime.datetime.now()
         day = now.strftime("%Y-%m-%d")
@@ -37,7 +39,7 @@ class basicFunc():
         print('请输入当天的逆回购水平：')
         repo = input()
         daily_record = pd.DataFrame([day, repo, time_stap]).T
-        daily_record.to_csv(path, mode='a', header=False,index = 0)
+        daily_record.to_csv(path, mode='a', header=False, index=0)
         record_list = pd.read_csv(path)
         print(record_list.head())
 
@@ -80,6 +82,78 @@ class basicFunc():
 
         return record
 
+    def timestap_cal(self, date_stap, type='year'):
+        print(date_stap)
+        date_stap = datetime.datetime.strptime(date_stap, '%Y-%m-%d')
+
+        aim_dict = {'daily': 1, 'weekly': 14}
+        if type in list(aim_dict.keys()):
+            future_date = date_stap + timedelta(days=aim_dict[type])
+        else:
+            # conv yyyy mm dd str 格式
+            conv_year = date_stap.year + 1
+            future_date = datetime.datetime(conv_year, date_stap.month, date_stap.day)
+        return future_date
+
+    def valid_gap(self, date_stap, type='year'):
+        # print(date_stap)
+        date_stap = datetime.datetime.strptime(date_stap, '%Y-%m-%d')
+        # print(date_stap)
+        base_time = datetime.datetime.now()
+        aim_dict = {'daily': 7, 'weekly': 14}
+        if type in list(aim_dict.keys()):
+            future_date = date_stap + timedelta(days=aim_dict[type])
+        else:
+            # conv yyyy mm dd str 格式
+            # print(date_stap)
+            # print(date_stap.month)
+            conv_year = date_stap.year + 1
+            # print(conv_year)
+            try:
+                future_date = datetime.datetime(conv_year, date_stap.month, date_stap.day)
+            except:
+                future_date = datetime.datetime(conv_year, date_stap.month - 1, date_stap.day)  # 平年2月没有29号
+            # print(future_date)
+        # print(base_time)
+        if future_date >= base_time:
+            return 'valid'
+        else:
+            return 'invalid'
+
+    def get_cash_flow(self):
+        time_annually = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_annual_repo.csv'))
+        time_weekly = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_double_weekly_repo.csv'))
+        time_daily = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_repo.csv'))
+        time_daily.loc[:, 'state'] = time_daily['day_stap'].apply(lambda x: self.valid_gap(x, 'daily'))
+        time_weekly.loc[:, 'state'] = time_weekly['day_stap'].apply(lambda x: self.valid_gap(x, 'weekly'))
+        time_annually.loc[:, 'state'] = time_annually['day_stap'].apply(lambda x: self.valid_gap(x))
+        print(time_annually.tail())
+        daily_cash_flow_dict = time_daily[time_daily['state'] == 'valid'].set_index('day_stap')['repo'].to_dict()
+        weekly_cash_flow_dict = time_weekly[time_weekly['state'] == 'valid'].set_index('day_stap')['repo'].to_dict()
+        annually_cash_flow_dict = time_annually[time_annually['state'] == 'valid'].set_index('day_stap')['repo'].to_dict()
+        print(annually_cash_flow_dict)
+
+        # print(list(daily_cash_flow_dict.values()))
+        daily_cash_flow = np.sum(list(daily_cash_flow_dict.values()))
+        weekly_cash_flow = np.sum(list(weekly_cash_flow_dict.values()))
+        annually_cash_flow = np.sum(list(annually_cash_flow_dict.values()))
+        conv_stap_daily, near_expired_cash_daily, conv_stap_monthly, near_expired_cash_monthly, conv_stap_annually, near_expired_cash_annually = 0, 0, 0, 0, 0, 0
+        if daily_cash_flow > 0:
+            time_stap_daily = min([x for x in list(daily_cash_flow_dict.keys())])
+            conv_stap_daily = self.timestap_cal(time_stap_daily, type='daily')
+            near_expired_cash_daily = daily_cash_flow_dict[time_stap_daily]
+        if weekly_cash_flow > 0:  # 取最小
+            time_stap_mothly = min([x for x in list(weekly_cash_flow_dict.keys())])
+            conv_stap_monthly = self.timestap_cal(time_stap_mothly, type='weekly')
+            near_expired_cash_monthly = weekly_cash_flow_dict[time_stap_mothly]
+        if annually_cash_flow > 0:
+            time_stap_annually = min([x for x in list(annually_cash_flow_dict.keys())])
+            conv_stap_annually = self.timestap_cal(time_stap_annually)
+            near_expired_cash_annually = annually_cash_flow_dict[time_stap_annually]
+        total_cash = daily_cash_flow + weekly_cash_flow + annually_cash_flow
+
+        return total_cash, annually_cash_flow, conv_stap_annually, near_expired_cash_annually, weekly_cash_flow, conv_stap_monthly, near_expired_cash_monthly, daily_cash_flow, near_expired_cash_daily
+
     def broadcast(self):
         double_weekly_df = pd.read_csv(r'data\reverse_double_weekly_repo.csv')
         annual_df = pd.read_csv(r'data\reverse_annual_repo.csv')
@@ -99,6 +173,19 @@ class basicFunc():
             annual_val = int(annual_df[annual_df['day_stap'] == today]['repo'].values[0])
         except:
             annual_val = 0
+
+            total_cash, annually_cash_flow, conv_stap_annually, near_expired_cash_annually, weekly_cash_flow, conv_stap_monthly, near_expired_cash_monthly, daily_cash_flow, near_expired_cash_daily = self.get_cash_flow()
+        if bool:
+            print(
+                '逆回购池共计{}亿，其中\n年度逆回购留存{}亿，最近将于{}到期{}亿；\n14天逆回购留存{}亿，最近将于{}到期{}亿；\n7天逆回购留存{},明日将到期{}亿；'.format(total_cash,
+                                                                                                    annually_cash_flow,
+                                                                                                    conv_stap_annually,
+                                                                                                    near_expired_cash_annually,
+                                                                                                    weekly_cash_flow,
+                                                                                                    conv_stap_monthly,
+                                                                                                    near_expired_cash_monthly,
+                                                                                                    daily_cash_flow,
+                                                                                                    near_expired_cash_daily))
         if outflow_daily > 0:
             print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购净流入{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         elif outflow_daily < 0:
@@ -226,6 +313,8 @@ class dataWarehouse:
 
 
 if __name__ == '__main__':
-    DW = dataWarehouse()
-    DW.reverse_repo_for_week()
-    DW.daily_repo_level()
+    bf = basicFunc()
+    bf.broadcast()
+    # DW = dataWarehouse()
+    # DW.reverse_repo_for_week()
+    # DW.daily_repo_level()
