@@ -174,18 +174,18 @@ class basicFunc():
         except:
             annual_val = 0
 
-            total_cash, annually_cash_flow, conv_stap_annually, near_expired_cash_annually, weekly_cash_flow, conv_stap_monthly, near_expired_cash_monthly, daily_cash_flow, near_expired_cash_daily = self.get_cash_flow()
-        if bool:
-            print(
-                '逆回购池共计{}亿，其中\n年度逆回购留存{}亿，最近将于{}到期{}亿；\n14天逆回购留存{}亿，最近将于{}到期{}亿；\n7天逆回购留存{},明日将到期{}亿；'.format(total_cash,
-                                                                                                    annually_cash_flow,
-                                                                                                    conv_stap_annually,
-                                                                                                    near_expired_cash_annually,
-                                                                                                    weekly_cash_flow,
-                                                                                                    conv_stap_monthly,
-                                                                                                    near_expired_cash_monthly,
-                                                                                                    daily_cash_flow,
-                                                                                                    near_expired_cash_daily))
+        total_cash, annually_cash_flow, conv_stap_annually, near_expired_cash_annually, weekly_cash_flow, conv_stap_monthly, near_expired_cash_monthly, daily_cash_flow, near_expired_cash_daily = self.get_cash_flow()
+        # if bool:
+        print(
+            '逆回购池共计{}亿，其中\n年度逆回购留存{}亿，最近将于{}到期{}亿；\n14天逆回购留存{}亿，最近将于{}到期{}亿；\n7天逆回购留存{},明日将到期{}亿；'.format(total_cash,
+                                                                                                annually_cash_flow,
+                                                                                                conv_stap_annually,
+                                                                                                near_expired_cash_annually,
+                                                                                                weekly_cash_flow,
+                                                                                                conv_stap_monthly,
+                                                                                                near_expired_cash_monthly,
+                                                                                                daily_cash_flow,
+                                                                                                near_expired_cash_daily))
         if outflow_daily > 0:
             print('央行7天逆回购{}亿,7天期限累计{}亿；单日逆回购净流入{}亿'.format(repo_daily, repo_for_week, math.fabs(outflow_daily)))
         elif outflow_daily < 0:
