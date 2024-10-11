@@ -43,7 +43,7 @@ def plotshow():
     pass # 好像tableau更方便
 def exec():
     daily_initialize()
-    annual_initialize()
+    # annual_initialize()
     # double_weekly_initialize()
     daily_broadcast()
     # pass

@@ -121,6 +121,7 @@ class basicFunc():
             return 'invalid'
 
     def get_cash_flow(self):
+        print(Config_base.base_path)
         time_annually = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_annual_repo.csv'))
         time_weekly = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_double_weekly_repo.csv'))
         time_daily = Config_base.read_data(os.path.join(Config_base.data_warehouse, 'reverse_repo.csv'))
@@ -201,7 +202,16 @@ class basicFunc():
 class warningState:
     def __init__(self):
         pass
+    def holiday_judge(self,datestamp):
+        import holidays
+        cn_holidays = holidays.China(years=datetime.datetime.now().year)
+        if datestamp in cn_holidays:
+            return 'holiday'
 
+        elif datestamp.weekday() >= 5:  # weekday() 返回0（周一）到6（周日）
+           return 'holiday'
+        else:
+           return 'weekday'
     def continuity(self, repo_df):
 
         sdate = date(2023, 1, 28)  # start date
@@ -218,22 +228,27 @@ class warningState:
                 lambda x: datetime.datetime.strptime(x, '%Y/%m/%d').strftime("%Y-%m-%d"))
         check_df = std_df.merge(repo_df, on='day_stap', how='left')
         check_df.loc[:, 'day_stap_date'] = pd.to_datetime(check_df['day_stap'], format='%Y-%m-%d')
-        check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: 'workday' if x.weekday() < 5 else 'weekend')
+        check_df.loc[:, 'tag'] = check_df['day_stap_date'].apply(lambda x: self.holiday_judge(x))
         error_cnt = check_df[check_df['repo'].isnull()].shape[0]
         if error_cnt > 0:
             print('存在丢失数据')
             # print(check_df)
-            check_df.loc[(check_df['tag'] == 'weekend') & check_df['repo'].isnull(), 'repo'] = 0
-            check_df.loc[(check_df['tag'] == 'weekend') & check_df['time_stap'].isnull(), 'time_stap'] = check_df[
+            check_df.loc[(check_df['tag'] == 'holiday') & check_df['repo'].isnull(), 'repo'] = 0
+            check_df.loc[(check_df['tag'] == 'holiday') & check_df['time_stap'].isnull(), 'time_stap'] = check_df[
                 'day_stap_date'].apply(lambda x: x.strftime("%Y-%m-%d %H:%M:%S"))
             print('完成修正')
             # print(check_df)
             error_cnt = check_df[check_df['repo'].isnull()].shape[0]
             if error_cnt > 0:
-                print('存在丢失数据需要手动补充，时间为：')
-                print(check_df.columns)
                 missing_date = check_df[check_df['repo'].isnull()]['day_stap'].values.tolist()
-                print(missing_date)
+                print(f'存在丢失数据需要手动补充，时间为：{missing_date}')
+                for datastamp_mis in missing_date:
+                    print('请输入{}的7天逆回购水平'.format(datastamp_mis))
+                    reverse_val = input()
+                    check_df.loc[(check_df['day_stap_date'] == datastamp_mis), 'repo'] = reverse_val
+                    check_df.loc[(check_df['day_stap_date'] == datastamp_mis), 'time_stap'] = check_df[
+                'day_stap_date'].apply(lambda x: x.strftime("%Y-%m-%d %H:%M:%S"))
+                    print(check_df[check_df['day_stap_date']== datastamp_mis])
         else:
             print('完成数据检查，数据合格')
         check_df = pd.DataFrame(check_df, columns=['day_stap', 'repo', 'time_stap'])

@@ -19,7 +19,7 @@ root_path = os.path.split(os.path.realpath(__file__))[0]  # 获取该脚本的�
 class Config(object):
     def __init__(self):
         # 配置数据路径
-        self.base_path = r"D:\program\data\a_reverse"
+        self.base_path = r"D:\工作\py_program\reverse"
         if self.is_exist(self.base_path) is False:
             self.base_path = r"/Users/zhuxinquan/Desktop/project_witsky/AudioClassification-Hubert"
             self.data_witsky_path = os.path.join(self.base_path, "data_witsky")
