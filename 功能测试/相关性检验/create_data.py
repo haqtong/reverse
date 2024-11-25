@@ -29,14 +29,12 @@ def get_trait():
     return df['trait_x1'].values
 
 def get_label(ts_code = '000002.SH'):
-    import tushare as ts
-    ts.set_token('60233d4b1cd305e22b75f387b88d5112dd606effcbe9084649e5600e')
-    pro = ts.pro_api()
-    # 20230204
-    df = pro.daily(ts_code=ts_code, start_date='20241120', end_date='20241125')
-    # df = ts.realtime_quote(ts_code=ts_code)
-
+    fn = '000001perf.xlsx'
+    infn = os.path.join(Config_base.base_path,'功能测试/相关性检验',fn)
+    df = Config_base.read_data(infn)
+    df.to_csv('000001_SH.csv')
     print(df.head())
+
 
     # data.to_csv('test.csv',index = 0)
     # print(data.columns)
