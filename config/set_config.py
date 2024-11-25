@@ -19,13 +19,8 @@ root_path = os.path.split(os.path.realpath(__file__))[0]  # 获取该脚本的�
 class Config(object):
     def __init__(self):
         # 配置数据路径
-        self.base_path = r"D:\工作\py_program\reverse"
-        if self.is_exist(self.base_path) is False:
-            self.base_path = r"/Users/zhuxinquan/Desktop/project_witsky/AudioClassification-Hubert"
-            self.data_witsky_path = os.path.join(self.base_path, "data_witsky")
-            self.audio_path = r"/data/nlp/data_origin/audio"
-        else:
-            self.data_warehouse = os.path.join(self.base_path, "src/data")
+        self.base_path = r"D:\python_program\reverse_2"
+        self.data_warehouse = os.path.join(self.base_path, "src/data")
 
 
         # self.code2label_path = os.path.join(self.data_witsky_path, "data_conf", "map_code.pkl")
