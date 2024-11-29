@@ -21,7 +21,7 @@ class Config(object):
         # 配置数据路径
         self.base_path = r"D:\python_program\reverse_2"
         self.data_warehouse = os.path.join(self.base_path, "src/data")
-
+        self.diyprogram_1 = os.path.join(self.base_path, "功能测试/相关性检验")
 
         # self.code2label_path = os.path.join(self.data_witsky_path, "data_conf", "map_code.pkl")
 

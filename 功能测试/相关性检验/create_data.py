@@ -37,11 +37,15 @@ def get_trait():
 def get_label(ts_code = '000002.SH'):
     fn = '000001_SH.csv'
     infn = os.path.join(Config_base.base_path,'功能测试/相关性检验',fn)
-    df = Config_base.read_data(infn)
+    ori_df = Config_base.read_data(infn)
+    print(ori_df.columns)
+    select_col = ['日期Date','收盘Close']
+    df = pd.DataFrame(ori_df,columns=select_col)
     df['日期Date'] =  df['日期Date'].astype('str')
-    df
-    print(df.head(1))
     print(df.columns)
+    df['收盘Close_1'] = df['收盘Close'].shift(1)
+    # df = df.dropna(subset = ['收盘Close_1'])
+    df['wave'] = df.apply(lambda x: round(x['收盘Close']/x['收盘Close_1']-1,4),axis = 1)
 
     return df
 
@@ -49,10 +53,10 @@ def get_label(ts_code = '000002.SH'):
 if __name__ == '__main__':
     df_1 = get_label()
     df_2 = get_trait()
-    aim_df = df_2.merge(df_1,on = '日期Date')
+    aim_df = df_2.merge(df_1,on = '日期Date',how = 'left')
     aim_df = aim_df.dropna()
     # aim_df = pd.DataFrame(aim_df,columns = ['日期Date','repo_7',''])
-    aim_df = pd.DataFrame(aim_df,columns = ['日期Date','trait_x1','收盘Close'])
+    aim_df = pd.DataFrame(aim_df,columns = ['日期Date','trait_x1','收盘Close','收盘Close_1','wave'])
     aim_df.to_csv('basic_data.csv')
 
     # print()
