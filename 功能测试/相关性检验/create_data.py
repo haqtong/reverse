@@ -58,7 +58,11 @@ if __name__ == '__main__':
     # aim_df = pd.DataFrame(aim_df,columns = ['日期Date','repo_7',''])
     aim_df = pd.DataFrame(aim_df,columns = ['日期Date','trait_x1','收盘Close','收盘Close_1','wave'])
     aim_df.to_csv('basic_data.csv')
-
+    import numpy as np
+    x = np.array(aim_df['trait_x1'].values)
+    y = np.array(aim_df['wave'].values)
+    matrix = np.corrcoef(x,y)
+    print(matrix)
     # print()
 
 

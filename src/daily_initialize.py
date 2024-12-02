@@ -17,7 +17,6 @@ def daily_initialize():
     DW.daily_repo_level()
 
 def daily_broadcast():
-    # normal broadcast
     BF.broadcast()
 
 def annual_initialize():
